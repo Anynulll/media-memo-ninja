@@ -12,8 +12,7 @@ interface FilterOption {
 }
 
 export const MemoFilter: React.FC = () => {
-  const { memos, activeFolderId } = useAppContext();
-  const [selectedTypes, setSelectedTypes] = React.useState<string[]>([]);
+  const { memos, activeFolderId, selectedTypes, setSelectedTypes } = useAppContext();
 
   // Define filter options
   const filterOptions: FilterOption[] = [

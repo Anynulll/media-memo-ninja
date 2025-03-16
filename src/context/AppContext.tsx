@@ -8,6 +8,7 @@ export interface MemoItem {
   folderId: string | null;
   createdAt: Date;
   title?: string;
+  imageUrl?: string; // Add imageUrl to track downloaded images
 }
 
 export interface FolderItem {
@@ -21,6 +22,8 @@ interface AppContextType {
   folders: FolderItem[];
   activeFolderId: string | null;
   searchTerm: string;
+  selectedTypes: string[];
+  setSelectedTypes: (types: string[]) => void;
   setSearchTerm: (term: string) => void;
   addMemo: (url: string, folderId?: string | null) => void;
   removeMemo: (id: string) => void;
@@ -28,6 +31,7 @@ interface AppContextType {
   removeFolder: (id: string) => void;
   setActiveFolderId: (id: string | null) => void;
   moveMemoToFolder: (memoId: string, folderId: string | null) => void;
+  updateMemoImage: (memoId: string, imageUrl: string) => void;
 }
 
 const AppContext = createContext<AppContextType | null>(null);
@@ -75,6 +79,7 @@ export const AppProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
 
   const [activeFolderId, setActiveFolderId] = useState<string | null>(null);
   const [searchTerm, setSearchTerm] = useState('');
+  const [selectedTypes, setSelectedTypes] = useState<string[]>([]);
 
   useEffect(() => {
     localStorage.setItem('memos', JSON.stringify(memos));
@@ -135,18 +140,29 @@ export const AppProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
     );
   };
 
+  const updateMemoImage = (memoId: string, imageUrl: string) => {
+    setMemos((prevMemos) => 
+      prevMemos.map(memo => 
+        memo.id === memoId ? { ...memo, imageUrl } : memo
+      )
+    );
+  };
+
   const value = {
     memos,
     folders,
     activeFolderId,
     searchTerm,
+    selectedTypes,
+    setSelectedTypes,
     setSearchTerm,
     addMemo,
     removeMemo,
     addFolder,
     removeFolder,
     setActiveFolderId,
-    moveMemoToFolder
+    moveMemoToFolder,
+    updateMemoImage
   };
 
   return <AppContext.Provider value={value}>{children}</AppContext.Provider>;

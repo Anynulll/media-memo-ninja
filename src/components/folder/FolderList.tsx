@@ -5,21 +5,27 @@ import { FolderItem } from './FolderItem';
 import { useAppContext } from '@/context/AppContext';
 
 export const FolderList: React.FC = () => {
-  const { folders, memos, activeFolderId, setActiveFolderId } = useAppContext();
+  const { folders, memos, activeFolderId, setActiveFolderId, selectedTypes } = useAppContext();
   
-  // Calculate memo counts for each folder
+  // Calculate memo counts for each folder, taking into account any type filters
   const folderCounts = useMemo(() => {
-    const counts: Record<string, number> = { all: memos.length };
+    // Filter memos by type if there are selected types
+    let filteredMemos = memos;
+    if (selectedTypes.length > 0) {
+      filteredMemos = memos.filter(memo => selectedTypes.includes(memo.type));
+    }
+    
+    const counts: Record<string, number> = { all: filteredMemos.length };
     
     folders.forEach(folder => {
-      counts[folder.id] = memos.filter(memo => memo.folderId === folder.id).length;
+      counts[folder.id] = filteredMemos.filter(memo => memo.folderId === folder.id).length;
     });
     
     // Count memos without a folder
-    counts.uncategorized = memos.filter(memo => memo.folderId === null).length;
+    counts.uncategorized = filteredMemos.filter(memo => memo.folderId === null).length;
     
     return counts;
-  }, [folders, memos]);
+  }, [folders, memos, selectedTypes]);
   
   return (
     <div className="space-y-1 animate-fade-in">

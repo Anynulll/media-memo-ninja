@@ -4,9 +4,9 @@ import { MemoCard } from './MemoCard';
 import { useAppContext } from '@/context/AppContext';
 
 export const MemoList: React.FC = () => {
-  const { memos, activeFolderId, searchTerm } = useAppContext();
+  const { memos, activeFolderId, searchTerm, selectedTypes } = useAppContext();
   
-  // Filter memos based on active folder and search term
+  // Filter memos based on active folder, search term, and selected types
   const filteredMemos = useMemo(() => {
     let filtered = memos;
     
@@ -26,8 +26,13 @@ export const MemoList: React.FC = () => {
       );
     }
     
+    // Filter by selected types
+    if (selectedTypes.length > 0) {
+      filtered = filtered.filter(memo => selectedTypes.includes(memo.type));
+    }
+    
     return filtered;
-  }, [memos, activeFolderId, searchTerm]);
+  }, [memos, activeFolderId, searchTerm, selectedTypes]);
   
   if (filteredMemos.length === 0) {
     return (
@@ -41,6 +46,8 @@ export const MemoList: React.FC = () => {
         <p className="text-muted-foreground text-sm max-w-md">
           {searchTerm ? 
             `No memos match your search term "${searchTerm}". Try a different search.` : 
+            selectedTypes.length > 0 ?
+            'No memos match the selected filters.' :
             'Add your first memo by clicking the "Add Memo" button.'}
         </p>
       </div>

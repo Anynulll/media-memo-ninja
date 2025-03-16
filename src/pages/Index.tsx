@@ -1,6 +1,7 @@
 
 import React, { useState } from 'react';
-import { Plus } from 'lucide-react';
+import { Link } from 'react-router-dom';
+import { Plus, Image } from 'lucide-react';
 import { Header } from '@/components/layout/Header';
 import { Container } from '@/components/layout/Container';
 import { MemoList } from '@/components/memo/MemoList';
@@ -10,6 +11,7 @@ import { FolderList } from '@/components/folder/FolderList';
 import { FolderForm } from '@/components/folder/FolderForm';
 import { CustomButton } from '@/components/ui/CustomButton';
 import { Separator } from '@/components/ui/separator';
+import { Button } from '@/components/ui/button';
 import { AppProvider } from '@/context/AppContext';
 
 const Index = () => {
@@ -30,6 +32,19 @@ const Index = () => {
                   <div className="rounded-xl bg-card p-4 shadow-sm border border-border">
                     <h2 className="text-sm font-semibold mb-3">Folders</h2>
                     <FolderList />
+                  </div>
+                  
+                  <div className="rounded-xl bg-card p-4 shadow-sm border border-border">
+                    <h2 className="text-sm font-semibold mb-3">Views</h2>
+                    <div className="space-y-1">
+                      <Link 
+                        to="/saved-images"
+                        className="flex items-center px-3 py-2 text-sm rounded-md hover:bg-muted transition-colors w-full"
+                      >
+                        <Image className="h-4 w-4 mr-2 text-primary" />
+                        Saved Images
+                      </Link>
+                    </div>
                   </div>
                 </div>
               </div>

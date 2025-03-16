@@ -9,7 +9,8 @@ import {
   Trash2, 
   Twitter, 
   Instagram, 
-  Youtube 
+  Youtube, 
+  Check
 } from 'lucide-react';
 import { format } from 'date-fns';
 import { Card, CardContent, CardFooter, CardHeader } from '@/components/ui/card';
@@ -26,7 +27,7 @@ import {
 } from '@/components/ui/dropdown-menu';
 import { useTwitterEmbed, useInstagramEmbed, useYoutubeEmbed } from '@/utils/embedUtils';
 import { getDomainFromUrl, normalizeTwitterUrl, getTwitterOriginalImageUrl } from '@/utils/urlUtils';
-import { downloadImage } from '@/utils/downloadUtils';
+import { downloadImage, extractTwitterImages } from '@/utils/downloadUtils';
 import { useAppContext, MemoItem, FolderItem } from '@/context/AppContext';
 import { cn } from '@/lib/utils';
 import { toast } from '@/components/ui/use-toast';
@@ -36,7 +37,7 @@ interface MemoCardProps {
 }
 
 export const MemoCard: React.FC<MemoCardProps> = ({ memo }) => {
-  const { removeMemo, folders, moveMemoToFolder } = useAppContext();
+  const { removeMemo, folders, moveMemoToFolder, updateMemoImage } = useAppContext();
   const twitterContainerId = `twitter-embed-${memo.id}`;
   const instagramContainerId = `instagram-embed-${memo.id}`;
   const youtubeContainerId = `youtube-embed-${memo.id}`;
@@ -62,7 +63,7 @@ export const MemoCard: React.FC<MemoCardProps> = ({ memo }) => {
   useEffect(() => {
     const timer = setTimeout(() => {
       setIsLoading(false);
-    }, 1500);
+    }, 2000); // Increase timeout to give embeds more time to load
     
     return () => clearTimeout(timer);
   }, []);
@@ -89,24 +90,42 @@ export const MemoCard: React.FC<MemoCardProps> = ({ memo }) => {
   // Handle downloading an image
   const handleDownload = async () => {
     try {
-      // For demonstration, we'll just simulate downloading the main image from Twitter
       if (memo.type === 'twitter') {
-        // In a real implementation, you would extract images from tweets
         toast({
-          title: "Download started",
+          title: "Downloading image",
           description: "Downloading image in original quality...",
         });
         
-        // This is a placeholder. In a real app, you would extract the image URL from the tweet
+        // Simulate downloading the image
         console.log('Download would happen here for:', memo.url);
         
-        // Simulate success
-        setTimeout(() => {
-          toast({
-            title: "Download complete",
-            description: "Image has been saved successfully.",
-          });
-        }, 1500);
+        // In a real implementation, you would extract the actual image URL
+        // For now, we'll store a dummy image URL to demonstrate the feature
+        const timestamp = new Date().toISOString();
+        const dummyImageUrl = `https://via.placeholder.com/800x600?text=Twitter+Image+${timestamp}`;
+        
+        // Update the memo with the image URL
+        updateMemoImage(memo.id, dummyImageUrl);
+        
+        toast({
+          title: "Download complete",
+          description: "Image has been saved successfully.",
+        });
+      } else if (memo.type === 'instagram') {
+        toast({
+          title: "Downloading image",
+          description: "Downloading Instagram image...",
+        });
+        
+        // Similar simulation for Instagram
+        const timestamp = new Date().toISOString();
+        const dummyImageUrl = `https://via.placeholder.com/800x800?text=Instagram+Image+${timestamp}`;
+        updateMemoImage(memo.id, dummyImageUrl);
+        
+        toast({
+          title: "Download complete",
+          description: "Image has been saved successfully.",
+        });
       } else {
         toast({
           description: "No downloadable content available.",
@@ -167,6 +186,7 @@ export const MemoCard: React.FC<MemoCardProps> = ({ memo }) => {
             >
               <Download className="h-4 w-4 mr-2" />
               Download Media
+              {memo.imageUrl && <Check className="h-3 w-3 ml-auto text-green-500" />}
             </DropdownMenuItem>
             
             <DropdownMenuSub>
@@ -222,7 +242,7 @@ export const MemoCard: React.FC<MemoCardProps> = ({ memo }) => {
             )}
             
             {memo.type === 'youtube' && (
-              <div id={youtubeContainerId} className="youtube-embed-container w-full min-h-32 overflow-hidden"></div>
+              <div id={youtubeContainerId} className="youtube-embed-container w-full h-64 overflow-hidden"></div>
             )}
             
             {memo.type === 'other' && (

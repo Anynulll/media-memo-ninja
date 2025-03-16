@@ -3,7 +3,7 @@
  * Utility functions for embedding social media content
  */
 
-import { useEffect } from 'react';
+import { useEffect, useRef } from 'react';
 import { normalizeTwitterUrl, formatYoutubeUrl } from './urlUtils';
 
 // Load Twitter/X widget script
@@ -54,6 +54,8 @@ export const processInstagramEmbeds = async (): Promise<void> => {
 
 // Custom hook for Twitter embeds
 export const useTwitterEmbed = (containerId: string, url: string | null) => {
+  const hasLoaded = useRef(false);
+
   useEffect(() => {
     if (!url) return;
     
@@ -63,32 +65,65 @@ export const useTwitterEmbed = (containerId: string, url: string | null) => {
 
     // Clear previous content
     container.innerHTML = '';
+    hasLoaded.current = false;
 
     const load = async () => {
       await loadTwitterWidgets();
+      
+      if (hasLoaded.current) return;
+      hasLoaded.current = true;
+      
       try {
+        const tweetId = normalizedUrl.split('/').pop()?.split('?')[0] || '';
+        
         if ((window as any).twttr && (window as any).twttr.widgets) {
           (window as any).twttr.widgets.createTweet(
-            normalizedUrl.split('/').pop()?.split('?')[0] || '',
+            tweetId,
             container,
             {
               theme: 'light',
               width: '100%',
               align: 'center'
             }
-          );
+          ).then(() => {
+            console.log(`Tweet ${tweetId} loaded successfully`);
+          }).catch((error: any) => {
+            console.error('Error creating tweet embed:', error);
+            // Fallback for failing embeds
+            container.innerHTML = `
+              <div class="p-4 text-center">
+                <a href="${url}" target="_blank" rel="noopener noreferrer" class="text-primary hover:underline">
+                  View on Twitter
+                </a>
+              </div>
+            `;
+          });
         }
       } catch (e) {
         console.error('Error creating tweet embed:', e);
+        // Fallback
+        container.innerHTML = `
+          <div class="p-4 text-center">
+            <a href="${url}" target="_blank" rel="noopener noreferrer" class="text-primary hover:underline">
+              View on Twitter
+            </a>
+          </div>
+        `;
       }
     };
 
     load();
+
+    return () => {
+      hasLoaded.current = false;
+    };
   }, [containerId, url]);
 };
 
 // Custom hook for Instagram embeds
 export const useInstagramEmbed = (containerId: string, url: string | null) => {
+  const hasLoaded = useRef(false);
+
   useEffect(() => {
     if (!url) return;
     
@@ -97,16 +132,22 @@ export const useInstagramEmbed = (containerId: string, url: string | null) => {
 
     // Clear previous content
     container.innerHTML = '';
+    hasLoaded.current = false;
 
     // Create blockquote for Instagram
     const blockquote = document.createElement('blockquote');
     blockquote.className = 'instagram-media';
     blockquote.setAttribute('data-instgrm-permalink', url);
     blockquote.setAttribute('data-instgrm-version', '14');
+    blockquote.style.margin = '0';
+    blockquote.style.width = '100%';
     container.appendChild(blockquote);
 
     // Process the embed
     const load = async () => {
+      if (hasLoaded.current) return;
+      hasLoaded.current = true;
+      
       await loadInstagramEmbed();
       if ((window as any).instgrm && (window as any).instgrm.Embeds) {
         (window as any).instgrm.Embeds.process();
@@ -114,6 +155,18 @@ export const useInstagramEmbed = (containerId: string, url: string | null) => {
     };
 
     load();
+    
+    // Try to process again after a delay (sometimes Instagram needs this)
+    const timer = setTimeout(() => {
+      if ((window as any).instgrm && (window as any).instgrm.Embeds) {
+        (window as any).instgrm.Embeds.process();
+      }
+    }, 2000);
+
+    return () => {
+      clearTimeout(timer);
+      hasLoaded.current = false;
+    };
   }, [containerId, url]);
 };
 
