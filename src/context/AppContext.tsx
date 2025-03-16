@@ -1,4 +1,3 @@
-
 import React, { createContext, useContext, useState, useEffect, ReactNode } from 'react';
 
 export interface MemoItem {
@@ -23,7 +22,7 @@ interface AppContextType {
   activeFolderId: string | null;
   searchTerm: string;
   selectedTypes: string[];
-  setSelectedTypes: (types: string[]) => void;
+  setSelectedTypes: React.Dispatch<React.SetStateAction<string[]>>;
   setSearchTerm: (term: string) => void;
   addMemo: (url: string, folderId?: string | null) => void;
   removeMemo: (id: string) => void;
@@ -124,7 +123,6 @@ export const AppProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
 
   const removeFolder = (id: string) => {
     setFolders((prevFolders) => prevFolders.filter(folder => folder.id !== id));
-    // Move memos to no folder
     setMemos((prevMemos) => 
       prevMemos.map(memo => 
         memo.folderId === id ? { ...memo, folderId: null } : memo

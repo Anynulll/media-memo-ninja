@@ -6,10 +6,11 @@ import { useAppContext } from '@/context/AppContext';
 import { CustomButton } from '@/components/ui/CustomButton';
 
 interface HeaderProps {
-  onOpenFolderModal: () => void;
+  onOpenFolderModal?: () => void;
+  hideAddFolder?: boolean;
 }
 
-export const Header: React.FC<HeaderProps> = ({ onOpenFolderModal }) => {
+export const Header: React.FC<HeaderProps> = ({ onOpenFolderModal, hideAddFolder = false }) => {
   const { searchTerm, setSearchTerm } = useAppContext();
   
   return (
@@ -34,15 +35,17 @@ export const Header: React.FC<HeaderProps> = ({ onOpenFolderModal }) => {
               className="w-full md:w-60 lg:w-72"
             />
             
-            <CustomButton
-              variant="subtle"
-              size="sm"
-              icon={<FolderPlus className="h-4 w-4" />}
-              onClick={onOpenFolderModal}
-              className="whitespace-nowrap"
-            >
-              New Folder
-            </CustomButton>
+            {!hideAddFolder && onOpenFolderModal && (
+              <CustomButton
+                variant="subtle"
+                size="sm"
+                icon={<FolderPlus className="h-4 w-4" />}
+                onClick={onOpenFolderModal}
+                className="whitespace-nowrap"
+              >
+                New Folder
+              </CustomButton>
+            )}
           </div>
         </div>
       </div>

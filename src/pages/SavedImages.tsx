@@ -8,6 +8,7 @@ import { useAppContext } from '@/context/AppContext';
 import { Button } from '@/components/ui/button';
 import { Separator } from '@/components/ui/separator';
 import { getDomainFromUrl } from '@/utils/urlUtils';
+import { AppProvider } from '@/context/AppContext';
 
 const SavedImages = () => {
   const navigate = useNavigate();
